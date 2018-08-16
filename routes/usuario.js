@@ -48,7 +48,7 @@ app.get('/', (req, res, next) => {
 // ========================================================
 // Crear nuevo usuario
 // ========================================================
-app.post('/', mdAutenticacion.verificaToken, (req, res, next) => {
+app.post('/', (req, res, next) => {
 
     // Sirve solo si esta instalado el Body-Parse
     var body = req.body;
