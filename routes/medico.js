@@ -7,7 +7,15 @@ var Medico = require('../models/medico');
 // Obtener todos los medicos
 // ========================================================
 app.get('/', (req, res, next) => {
+
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
+
     Medico.find({})
+        .skip(desde)
+        .limit(5)
+        .populate('usuario', 'nombre email')
+        .populate('hospital')
         .exec(
             (err, medicos) => {
                 if (err) {
@@ -18,11 +26,22 @@ app.get('/', (req, res, next) => {
                     });
                 }
 
-                res.status(200).json({
-                    ok: true,
-                    medicos: medicos
+                Medico.count({}, (err, conteo) => {
+                    if (err) {
+                        return res.status(500).json({
+                            ok: false,
+                            mensaje: 'Error cargando medicos',
+                            errors: err
+                        });
+                    }
+
+                    res.status(200).json({
+                        ok: true,
+                        medicos: medicos,
+                        total: conteo
+                    });
                 });
-            })
+            });
 });
 
 // ========================================================
@@ -80,7 +99,7 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
         }
 
         medico.nombre = body.nombre;
-        medico.usuario = req.usuario._id;;
+        medico.usuario = req.usuario._id;
         medico.hospital = body.hospital;
 
         medico.save((err, medicoGuardado) => {
